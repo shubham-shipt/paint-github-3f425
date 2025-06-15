@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyDesk | Employees</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .expand-icon {
+            transform: rotate(180deg);
+        }
+        .content {
+            transition: margin-left 0.3s ease;
+        }
+        .dark .dark\:bg-dark-800 {
+            background-color: #1f2937;
+        }
+        .dark .dark\:text-white {
+            color: #fff;
+        }
+        .dark .dark\:bg-dark-700 {
+            background-color: #374151;
+        }
+        .dark .dark\:border-dark-600 {
+            border-color: #4b5563;
+        }
+        .toast {
+            animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-out 2.5s forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+                position: fixed;
+                left: -200px;
+                height: 100%;
+                z-index: 50;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .content {
+                margin-left: 0 !important;
+            }
+            .table th, .table td {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
+            header {
+                padding: 0.5rem 1rem;
+            }
+            header h1 {
+                font-size: 1.25rem;
+            }
+            .search-bar input {
+                width: 120px;
+            }
+            #addEmployeeBtn {
+                font-size: 0.875rem;
+                padding: 0.5rem 1rem;
+            }
+            #employeeModal {
+                padding: 1rem;
+            }
+            #employeeModal input, #employeeModal select {
+                font-size: 0.875rem;
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="h-full dark:bg-dark-800">
+    <div id="toast" class="hidden fixed top-5 right-5 z-50">
+        <div class="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow-lg dark:text-gray-400 dark:bg-gray-800">
+            <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                <i class="fas fa-check"></i>
+            </div>
+            <div id="toastMessage" class="ml-3 text-sm font-normal">Action successful!</div>
+            <button type="button" class="ml-auto p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" onclick="hideToast()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex h-full">
+        <div id="sidebar" class="sidebar bg-white dark:bg-dark-800 w-64 shadow-lg flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b dark:border-dark-600">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                        DD
+                    </div>
+                    <span class="logo-text ml-3 text-xl font-semibold dark:text-white">DailyDesk</span>
+                </div>
+                <button id="toggleSidebar" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                    <i class="fas fa-chevron-left expand-icon"></i>
+                </button>
+            </div>
+            <div class="p-4 border-b dark:border-dark-600 flex items-center">
+                <div class="relative">
+                    <img src="https://randomuser.me/api/portraits/men/44.jpg" alt="User" class="w-10 h-10 rounded-full">
+                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium dark:text-white">Shubham Singh</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Admin</p>
+                </div>
+            </div>
+            <nav class="flex-1 overflow-y-auto">
+                <ul class="p-2">
+                    <li>
+                        <a href="dashboard.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-tachometer-alt text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="employees.html" class="flex items-center p-2 text-base font-medium text-blue-600 bg-blue-50 rounded-lg dark:text-white dark:bg-gray-700 group">
+                            <i class="fas fa-users text-blue-500 dark:text-blue-400"></i>
+                            <span class="nav-text ml-3">Employees</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="attendance.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-calendar-check text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Attendance</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="tasks.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-tasks text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Tasks</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="leave.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-calendar-alt text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Leave</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-file-alt text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-cog text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="p-4 border-t dark:border-dark-600">
+                <div class="flex items-center justify-between">
+                    <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i class="fas fa-moon text-gray-500 dark:text-yellow-300"></i>
+                    </button>
+                    <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i class="fas fa-sign-out-alt text-gray-500 dark:text-gray-400"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="content" class="content flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white dark:bg-dark-800 shadow-sm z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center">
+                        <button id="mobileMenuToggle" class="md:hidden text-gray-500 dark:text-gray-400 mr-2">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Employees</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative search-bar">
+                            <input type="text" id="searchInput" placeholder="Search employees..." class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" onkeyup="filterEmployees()">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                        <button id="addEmployeeBtn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                            <i class="fas fa-plus mr-2"></i>Add Employee
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-900">
+                <div class="bg-white dark:bg-dark-700 rounded-lg shadow overflow-hidden">
+                    <div class="p-6 border-b dark:border-dark-600">
+                        <h3 class="text-lg font-semibold dark:text-white">Employee List</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600 table">
+                            <thead class="bg-gray-50 dark:bg-gray-600">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Department</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Role</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeeTable" class="bg-white dark:bg-dark-700 divide-y divide-gray-200 dark:divide-gray-600">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium dark:text-white">Vikram Sharma</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">Engineering</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">vikram.sharma@dailydesk.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">Senior Developer</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <button class="text-blue-500 hover:underline mr-2" onclick="editEmployee('Vikram Sharma')">Edit</button>
+                                        <button class="text-red-500 hover:underline" onclick="deleteEmployee('Vikram Sharma')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/28.jpg" alt="">
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium dark:text-white">Priya Mehra</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">Marketing</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">priya.mehra@dailydesk.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">Marketing Lead</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <button class="text-blue-500 hover:underline mr-2" onclick="editEmployee('Priya Mehra')">Edit</button>
+                                        <button class="text-red-500 hover:underline" onclick="deleteEmployee('Priya Mehra')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/47.jpg" alt="">
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium dark:text-white">Arjun Patel</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">Analytics</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">arjun.patel@dailydesk.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">Data Analyst</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">On Leave</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <button class="text-blue-500 hover:underline mr-2" onclick="editEmployee('Arjun Patel')">Edit</button>
+                                        <button class="text-red-500 hover:underline" onclick="deleteEmployee('Arjun Patel')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/65.jpg" alt="">
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium dark:text-white">Neha Gupta</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">HR</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">neha.gupta@dailydesk.com</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">HR Specialist</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <button class="text-blue-500 hover:underline mr-2" onclick="editEmployee('Neha Gupta')">Edit</button>
+                                        <button class="text-red-500 hover:underline" onclick="deleteEmployee('Neha Gupta')">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="employeeModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white dark:bg-dark-700 rounded-lg shadow-lg p-6 w-full max-w-md">
+                        <h3 id="modalTitle" class="text-lg font-semibold dark:text-white">Add Employee</h3>
+                        <div class="mt-4">
+                            <input id="empName" type="text" placeholder="Name" class="w-full p-2 mb-2 border rounded-lg dark:bg-gray-600 dark:text-white">
+                            <input id="empDept" type="text" placeholder="Department" class="w-full p-2 mb-2 border rounded-lg dark:bg-gray-600 dark:text-white">
+                            <input id="empEmail" type="email" placeholder="Email" class="w-full p-2 mb-2 border rounded-lg dark:bg-gray-600 dark:text-white">
+                            <input id="empRole" type="text" placeholder="Role" class="w-full p-2 mb-2 border rounded-lg dark:bg-gray-600 dark:text-white">
+                            <select id="empStatus" class="w-full p-2 mb-2 border rounded-lg dark:bg-gray-600 dark:text-white">
+                                <option value="Active">Active</option>
+                                <option value="On Leave">On Leave</option>
+                                <option value="Remote">Remote</option>
+                                <option value="On Probation">On Probation</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button id="cancelModal" class="px-4 py-2 mr-2 bg-gray-300 rounded-lg hover:bg-gray-400">Cancel</button>
+                            <button id="saveEmployee" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let employees = [
+            { name: 'Vikram Sharma', dept: 'Engineering', email: 'vikram.sharma@dailydesk.com', role: 'Senior Developer', status: 'Active' },
+            { name: 'Priya Mehra', dept: 'Marketing', email: 'priya.mehra@dailydesk.com', role: 'Marketing Lead', status: 'Active' },
+            { name: 'Arjun Patel', dept: 'Analytics', email: 'arjun.patel@dailydesk.com', role: 'Data Analyst', status: 'On Leave' },
+            { name: 'Neha Gupta', dept: 'HR', email: 'neha.gupta@dailydesk.com', role: 'HR Specialist', status: 'Active' }
+        ];
+
+        document.getElementById('toggleSidebar').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('content').classList.toggle('ml-20');
+        });
+
+        document.getElementById('mobileMenuToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+            updateThemeIcon();
+        });
+
+        function updateThemeIcon() {
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.innerHTML = document.documentElement.classList.contains('dark') 
+                ? '<i class="fas fa-sun text-yellow-300"></i>' 
+                : '<i class="fas fa-moon text-gray-500"></i>';
+        }
+
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+        updateThemeIcon();
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.remove('hidden');
+            toast.classList.add('toast');
+            setTimeout(hideToast, 3000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('hidden');
+            toast.classList.remove('toast');
+        }
+
+        function renderEmployees() {
+            const tableBody = document.getElementById('employeeTable');
+            tableBody.innerHTML = '';
+            employees.forEach(emp => {
+                const row = `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/${emp.name.includes('Priya') || emp.name.includes('Neha') ? 'women' : 'men'}/${emp.name.includes('Vikram') ? '32' : emp.name.includes('Priya') ? '28' : emp.name.includes('Arjun') ? '47' : '65'}.jpg" alt="">
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium dark:text-white">${emp.name}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">${emp.dept}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">${emp.email}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">${emp.role}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                ${emp.status === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
+                                  emp.status === 'On Leave' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : 
+                                  emp.status === 'Remote' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 
+                                  emp.status === 'On Probation' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' : 
+                                  'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}">
+                                ${emp.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <button class="text-blue-500 hover:underline mr-2" onclick="editEmployee('${emp.name}')">Edit</button>
+                            <button class="text-red-500 hover:underline" onclick="deleteEmployee('${emp.name}')">Delete</button>
+                        </td>
+                    </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        function filterEmployees() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = employees.filter(emp => 
+                emp.name.toLowerCase().includes(search) || 
+                emp.dept.toLowerCase().includes(search) || 
+                emp.email.toLowerCase().includes(search)
+            );
+            employees = filtered;
+            renderEmployees();
+        }
+
+        function addEmployee() {
+            document.getElementById('modalTitle').textContent = 'Add Employee';
+            document.getElementById('empName').value = '';
+            document.getElementById('empDept').value = '';
+            document.getElementById('empEmail').value = '';
+            document.getElementById('empRole').value = '';
+            document.getElementById('empStatus').value = 'Active';
+            document.getElementById('employeeModal').classList.remove('hidden');
+        }
+
+        function editEmployee(name) {
+            const emp = employees.find(e => e.name === name);
+            document.getElementById('modalTitle').textContent = 'Edit Employee';
+            document.getElementById('empName').value = emp.name;
+            document.getElementById('empDept').value = emp.dept;
+            document.getElementById('empEmail').value = emp.email;
+            document.getElementById('empRole').value = emp.role;
+            document.getElementById('empStatus').value = emp.status;
+            document.getElementById('employeeModal').classList.remove('hidden');
+        }
+
+        function deleteEmployee(name) {
+            employees = employees.filter(e => e.name !== name);
+            renderEmployees();
+            showToast('Employee deleted!');
+        }
+
+        document.getElementById('addEmployeeBtn').addEventListener('click', addEmployee);
+
+        document.getElementById('saveEmployee').addEventListener('click', () => {
+            const name = document.getElementById('empName').value;
+            const dept = document.getElementById('empDept').value;
+            const email = document.getElementById('empEmail').value;
+            const role = document.getElementById('empRole').value;
+            const status = document.getElementById('empStatus').value;
+            
+            if (name && dept && email && role) {
+                const existing = employees.find(e => e.name === document.getElementById('empName').value);
+                if (existing) {
+                    employees = employees.map(e => e.name === name ? { name, dept, email, role, status } : e);
+                    showToast('Employee updated!');
+                } else {
+                    employees.push({ name, dept, email, role, status });
+                    showToast('Employee added!');
+                }
+                renderEmployees();
+                document.getElementById('employeeModal').classList.add('hidden');
+            } else {
+                showToast('Please fill all fields!');
+            }
+        });
+
+        document.getElementById('cancelModal').addEventListener('click', () => {
+            document.getElementById('employeeModal').classList.add('hidden');
+        });
+
+        setTimeout(() => {
+            showToast('Welcome to Employees!');
+            renderEmployees();
+        }, 1000);
+    </script>
+</body>
+</html>

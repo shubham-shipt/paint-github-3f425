@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="stylesheet" href="cs34.css">
+    <title>Login</title>
+</head>
+<body>
+    <div class="ring">
+        <i style="--clr:#1F2937;"></i>
+        <i style="--clr:#9506a8;"></i>
+        <i style="--clr:#108e92;"></i>
+        <div class="login">
+            <h2>Login</h2>
+            <form id="login-form">
+                <div class="inputBx">
+                    <input type="text" placeholder="Username" required>
+                </div>
+                <div class="inputBx">
+                    <input type="password" placeholder="Password" required>
+                </div>
+                <div class="inputBx">
+                    <input type="submit" value="Sign in">
+                </div>
+            </form>
+            <div class="links">
+                <a href="#">Forget Password</a>
+                <a href="#">Signup</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            window.location.href = 'dashboard.html';
+        });
+    </script>
+</body>
+</html>

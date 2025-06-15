@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyDesk | Leave</title>
+    <link rel="icon" type="image/png" href="icon.png"> <!-- Favicon for DailyDesk -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .expand-icon {
+            transform: rotate(180deg);
+        }
+        .content {
+            transition: margin-left 0.3s ease;
+        }
+        .dark .dark\:bg-dark-800 {
+            background-color: #1f2937;
+        }
+        .dark .dark\:text-white {
+            color: #fff;
+        }
+        .dark .dark\:bg-dark-700 {
+            background-color: #374151;
+        }
+        .dark .dark\:border-dark-600 {
+            border-color: #4b5563;
+        }
+        .toast {
+            animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-out 2.5s forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="h-full dark:bg-dark-800">
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed top-5 right-5 z-50">
+        <div class="flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow-lg dark:text-gray-400 dark:bg-gray-800">
+            <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                <i class="fas fa-check"></i>
+            </div>
+            <div id="toastMessage" class="ml-3 text-sm font-normal">Action successful!</div>
+            <button type="button" class="ml-auto p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" onclick="hideToast()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex h-full">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar bg-white dark:bg-dark-800 w-64 shadow-lg flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b dark:border-dark-600">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                        DD
+                    </div>
+                    <span class="logo-text ml-3 text-xl font-semibold dark:text-white">DailyDesk</span>
+                </div>
+                <button id="toggleSidebar" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                    <i class="fas fa-chevron-left expand-icon"></i>
+                </button>
+            </div>
+            <div class="p-4 border-b dark:border-dark-600 flex items-center">
+                <div class="relative">
+                    <img src="https://randomuser.me/api/portraits/men/44.jpg" alt="User" class="w-10 h-10 rounded-full">
+                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium dark:text-white">Shubham Singh</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Admin</p>
+                </div>
+            </div>
+            <nav class="flex-1 overflow-y-auto">
+                <ul class="p-2">
+                    <li>
+                        <a href="dashboard.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-tachometer-alt text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="employees.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-users text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Employees</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="attendance.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-calendar-check text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Attendance</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="tasks.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-tasks text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Tasks</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="leave.html" class="flex items-center p-2 text-base font-medium text-blue-600 bg-blue-50 rounded-lg dark:text-white dark:bg-gray-700 group">
+                            <i class="fas fa-calendar-alt text-blue-500 dark:text-blue-400"></i>
+                            <span class="nav-text ml-3">Leave</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-file-alt text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Reports</span>
+                        </a>
+                    </li>
+                    <!-- <li>
+                        <a href="manager.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-robot text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Manager</span>
+                        </a>
+                    </li> -->
+                    <li>
+                        <a href="settings.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-cog text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="p-4 border-t dark:border-dark-600">
+                <div class="flex items-center justify-between">
+                    <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i class="fas fa-moon text-gray-500 dark:text-yellow-300"></i>
+                    </button>
+                    <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i class="fas fa-sign-out-alt text-gray-500 dark:text-gray-400"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="content" class="content flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="bg-white dark:bg-dark-800 shadow-sm z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center">
+                        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Leave</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="Search by name or type..." class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" onkeyup="filterLeaves()">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-900">
+                <div class="bg-white dark:bg-dark-700 rounded-lg shadow overflow-hidden">
+                    <div class="p-6 border-b dark:border-dark-600">
+                        <h3 class="text-lg font-semibold dark:text-white">Leave Requests</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                            <thead class="bg-gray-50 dark:bg-gray-600">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Employee</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Leave Type</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Start Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">End Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaveTable" class="bg-white dark:bg-dark-700 divide-y divide-gray-200 dark:divide-gray-600">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img class="h-8 w-8 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+                                            <div class="ml-2 text-sm dark:text-white">Vikram Sharma</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">Annual Leave</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">2025-06-20</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">2025-06-25</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Pending</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <button class="text-green-500 hover:underline mr-2" onclick="approveLeave('Vikram Sharma', '2025-06-20')">Approve</button>
+                                        <button class="text-red-500 hover:underline mr-2" onclick="rejectLeave('Vikram Sharma', '2025-06-20')">Reject</button>
+                                        <button class="text-red-500 hover:underline" onclick="deleteLeave('Vikram Sharma', '2025-06-20')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img class="h-8 w-8 rounded-full" src="https://randomuser.me/api/portraits/women/28.jpg" alt="">
+                                            <div class="ml-2 text-sm dark:text-white">Priya Mehra</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">Sick Leave</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">2025-06-15</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">2025-06-16</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Approved</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <button class="text-red-500 hover:underline" onclick="deleteLeave('Priya Mehra', '2025-06-15')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img class="h-8 w-8 rounded-full" src="https://randomuser.me/api/portraits/men/47.jpg" alt="">
+                                            <div class="ml-2 text-sm dark:text-white">Arjun Patel</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">Casual Leave</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">2025-06-17</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">2025-06-18</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Pending</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <button class="text-green-500 hover:underline mr-2" onclick="approveLeave('Arjun Patel', '2025-06-17')">Approve</button>
+                                        <button class="text-red-500 hover:underline mr-2" onclick="rejectLeave('Arjun Patel', '2025-06-17')">Reject</button>
+                                        <button class="text-red-500 hover:underline" onclick="deleteLeave('Arjun Patel', '2025-06-17')">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img class="h-8 w-8 rounded-full" src="https://randomuser.me/api/portraits/women/65.jpg" alt="">
+                                            <div class="ml-2 text-sm dark:text-white">Neha Gupta</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">Maternity Leave</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">2025-07-01</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">2025-09-30</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Rejected</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <button class="text-red-500 hover:underline" onclick="deleteLeave('Neha Gupta', '2025-07-01')">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Sample leave data
+        let leaves = [
+            { employee: 'Vikram Sharma', type: 'Annual Leave', startDate: '2025-06-20', endDate: '2025-06-25', status: 'Pending' },
+            { employee: 'Priya Mehra', type: 'Sick Leave', startDate: '2025-06-15', endDate: '2025-06-16', status: 'Approved' },
+            { employee: 'Arjun Patel', type: 'Casual Leave', startDate: '2025-06-17', endDate: '2025-06-18', status: 'Pending' },
+            { employee: 'Neha Gupta', type: 'Maternity Leave', startDate: '2025-07-01', endDate: '2025-09-30', status: 'Rejected' }
+        ];
+
+        // Toggle sidebar
+        document.getElementById('toggleSidebar').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('content').classList.toggle('ml-20');
+        });
+
+        // Theme toggle
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+            updateThemeIcon();
+        });
+
+        function updateThemeIcon() {
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.innerHTML = document.documentElement.classList.contains('dark') 
+                ? '<i class="fas fa-sun text-yellow-300"></i>' 
+                : '<i class="fas fa-moon text-gray-500"></i>';
+        }
+
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+        updateThemeIcon();
+
+        // Toast functions
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.remove('hidden');
+            toast.classList.add('toast');
+            setTimeout(hideToast, 3000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('hidden');
+            toast.classList.remove('toast');
+        }
+
+        // Leave functions
+        function renderLeaves() {
+            const tableBody = document.getElementById('leaveTable');
+            tableBody.innerHTML = '';
+            leaves.forEach(leave => {
+                const row = `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <img class="h-8 w-8 rounded-full" src="https://randomuser.me/api/portraits/${leave.employee.includes('Priya') || leave.employee.includes('Neha') ? 'women' : 'men'}/${leave.employee.includes('Vikram') ? '32' : leave.employee.includes('Priya') ? '28' : leave.employee.includes('Arjun') ? '47' : '65'}.jpg" alt="">
+                                <div class="ml-2 text-sm dark:text-white">${leave.employee}</div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">${leave.type}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">${leave.startDate}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm dark:text-white">${leave.endDate}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                ${leave.status === 'Approved' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
+                                  leave.status === 'Pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : 
+                                  'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'}">
+                                ${leave.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            ${leave.status === 'Pending' ? `
+                                <button class="text-green-500 hover:underline mr-2" onclick="approveLeave('${leave.employee}', '${leave.startDate}')">Approve</button>
+                                <button class="text-red-500 hover:underline mr-2" onclick="rejectLeave('${leave.employee}', '${leave.startDate}')">Reject</button>
+                            ` : ''}
+                            <button class="text-red-500 hover:underline" onclick="deleteLeave('${leave.employee}', '${leave.startDate}')">Delete</button>
+                        </td>
+                    </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        function filterLeaves() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = leaves.filter(leave => 
+                leave.employee.toLowerCase().includes(search) || 
+                leave.type.toLowerCase().includes(search)
+            );
+            leaves = filtered;
+            renderLeaves();
+        }
+
+        function approveLeave(employee, startDate) {
+            leaves = leaves.map(leave => 
+                leave.employee === employee && leave.startDate === startDate 
+                ? { ...leave, status: 'Approved' } 
+                : leave
+            );
+            renderLeaves();
+            showToast('Leave approved!');
+        }
+
+        function rejectLeave(employee, startDate) {
+            leaves = leaves.map(leave => 
+                leave.employee === employee && leave.startDate === startDate 
+                ? { ...leave, status: 'Rejected' } 
+                : leave
+            );
+            renderLeaves();
+            showToast('Leave rejected!');
+        }
+
+        function deleteLeave(employee, startDate) {
+            leaves = leaves.filter(leave => 
+                leave.employee !== employee || leave.startDate !== startDate
+            );
+            renderLeaves();
+            showToast('Leave deleted!');
+        }
+
+        // Initial render
+        setTimeout(() => {
+            showToast('Welcome to Leave!');
+            renderLeaves();
+        }, 1000);
+    </script>
+</body>
+</html>

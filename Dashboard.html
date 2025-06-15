@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyDesk | Dashboard</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 70px;
+        }
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .expand-icon {
+            transform: rotate(180deg);
+        }
+        .content {
+            transition: margin-left 0.3s ease;
+        }
+        .dark .dark\:bg-dark-800 {
+            background-color: #1f2937;
+        }
+        .dark .dark\:text-white {
+            color: #fff;
+        }
+        .dark .dark\:bg-dark-700 {
+            background-color: #374151;
+        }
+        .dark .dark\:border-dark-600 {
+            border-color: #4b5563;
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        .toast {
+            animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-out 2.5s forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+                position: fixed;
+                left: -200px;
+                height: 100%;
+                z-index: 50;
+            }
+            .sidebar.active {
+                left: 0;
+            }
+            .content {
+                margin-left: 0 !important;
+            }
+            .stats-card {
+                padding: 1rem;
+            }
+            .stats-card h3 {
+                font-size: 1.25rem;
+            }
+            .table th, .table td {
+                font-size: 0.875rem;
+                padding: 0.5rem;
+            }
+            .chart-container {
+                height: 60vh !important;
+            }
+            header {
+                padding: 0.5rem 1rem;
+            }
+            header h1 {
+                font-size: 1.25rem;
+            }
+            .search-bar input {
+                width: 100px;
+            }
+        }
+    </style>
+</head>
+<body class="h-full dark:bg-dark-800">
+    <div id="toast" class="hidden fixed top-5 right-5 z-50">
+        <div class="flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-lg dark:text-gray-400 dark:bg-gray-800">
+            <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
+                <i class="fas fa-check"></i>
+            </div>
+            <div class="ml-3 text-sm font-normal">Welcome back, Admin!</div>
+            <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700" onclick="hideToast()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex h-full">
+        <div id="sidebar" class="sidebar bg-white dark:bg-dark-800 w-64 shadow-lg flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b dark:border-dark-600">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                        DD
+                    </div>
+                    <span class="logo-text ml-3 text-xl font-semibold dark:text-white">DailyDesk</span>
+                </div>
+                <button id="toggleSidebar" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                    <i class="fas fa-chevron-left expand-icon"></i>
+                </button>
+            </div>
+
+            <div class="p-4 border-b dark:border-dark-600 flex items-center">
+                <div class="relative">
+                    <img src="https://randomuser.me/api/portraits/men/44.jpg" alt="User" class="w-10 h-10 rounded-full">
+                    <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium dark:text-white">Shubham Singh</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Admin</p>
+                </div>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto">
+                <ul class="p-2">
+                    <li>
+                        <a href="#" class="flex items-center p-2 text-base font-medium text-blue-600 bg-blue-50 rounded-lg dark:text-white dark:bg-gray-700 group">
+                            <i class="fas fa-tachometer-alt text-blue-500 dark:text-blue-400"></i>
+                            <span class="nav-text ml-3">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="employees.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-users text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Employees</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="attendance.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-calendar-check text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Attendance</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="tasks.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-tasks text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Tasks</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="leave.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-calendar-alt text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Leave</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="reports.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-file-alt text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Reports</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="settings.html" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 group">
+                            <i class="fas fa-cog text-gray-500 dark:text-gray-400"></i>
+                            <span class="nav-text ml-3">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="p-4 border-t dark:border-dark-600">
+                <div class="flex items-center justify-between">
+                    <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i class="fas fa-moon text-gray-500 dark:text-yellow-300"></i>
+                    </button>
+                    <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <i class="fas fa-sign-out-alt text-gray-500 dark:text-gray-400"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="content" class="content flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white dark:bg-dark-800 shadow-sm z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center">
+                        <button id="mobileMenuToggle" class="md:hidden text-gray-500 dark:text-gray-400 mr-2">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Dashboard</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-bell text-gray-500 dark:text-gray-400"></i>
+                                <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-envelope text-gray-500 dark:text-gray-400"></i>
+                                <span class="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full"></span>
+                            </button>
+                        </div>
+                        <div class="relative search-bar">
+                            <input type="text" placeholder="Search..." class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-100 dark:bg-gray-900">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white dark:bg-dark-700 rounded-lg shadow p-6 stats-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400">Total Employees</p>
+                                <h3 class="text-2xl font-bold dark:text-white">142</h3>
+                                <p class="text-sm text-green-500 flex items-center">
+                                    <i class="fas fa-arrow-up mr-1"></i> 12% from last month
+                                </p>
+                            </div>
+                            <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-dark-700 rounded-lg shadow p-6 stats-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400">Active Today</p>
+                                <h3 class="text-2xl font-bold dark:text-white">98</h3>
+                                <p class="text-sm text-red-500 flex items-center">
+                                    <i class="fas fa-arrow-down mr-1"></i> 5% from yesterday
+                                </p>
+                            </div>
+                            <div class="p-3 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300">
+                                <i class="fas fa-user-check text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-dark-700 rounded-lg shadow p-6 stats-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400">On Leave</p>
+                                <h3 class="text-2xl font-bold dark:text-white">24</h3>
+                                <p class="text-sm text-green-500 flex items-center">
+                                    <i class="fas fa-arrow-up mr-1"></i> 3% from last week
+                                </p>
+                            </div>
+                            <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-300">
+                                <i class="fas fa-umbrella-beach text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-dark-700 rounded-lg shadow p-6 stats-card">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 dark:text-gray-400">Pending Tasks</p>
+                                <h3 class="text-2xl font-bold dark:text-white">16</h3>
+                                <p class="text-sm text-green-500 flex items-center">
+                                    <i class="fas fa-arrow-down mr-1"></i> 8% from last week
+                                </p>
+                            </div>
+                            <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300">
+                                <i class="fas fa-tasks text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white dark:bg-dark-700 rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold dark:text-white">Employee Distribution</h3>
+                            <select class="bg-gray-100 dark:bg-gray-600 border-0 text-sm rounded focus:ring-blue-500 focus:border-blue-500 dark:text-white">
+                                <option>This Month</option>
+                                <option>Last Month</option>
+                                <option>This Year</option>
+                            </select>
+                        </div>
+                        <div class="h-80 chart-container">
+                            <canvas id="departmentChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-dark-700 rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold dark:text-white">Attendance Trend</h3>
+                            <select class="bg-gray-100 dark:bg-gray-600 border-0 text-sm rounded focus:ring-blue-500 focus:border-blue-500 dark:text-white">
+                                <option>Last 14 Days</option>
+                                <option>Last 7 Days</option>
+                                <option>Last 30 Days</option>
+                            </select>
+                        </div>
+                        <div class="h-80 chart-container">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-dark-700 rounded-lg shadow overflow-hidden">
+                        <div class="p-6 border-b dark:border-dark-600">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-semibold dark:text-white">Recent Employees</h3>
+                                <a href="#" class="text-sm text-blue-500 hover:underline">View All</a>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600 table">
+                                <thead class="bg-gray-50 dark:bg-gray-600">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Department</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Join Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contact</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-dark-700 divide-y divide-gray-200 dark:divide-gray-600">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10">
+                                                    <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium dark:text-white">Amit Das</div>
+                                                    <div class="text-sm text-gray-500 dark:text-gray-400">amit.das@example.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">Engineering</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">15 Jun 2023</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">+91 98765 43210</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10">
+                                                    <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/28.jpg" alt="">
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium dark:text-white">Priya Sharma</div>
+                                                    <div class="text-sm text-gray-500 dark:text-gray-400">priya.sharma@example.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">Marketing</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">10 Jun 2023</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">+91 87654 32109</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10">
+                                                    <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/75.jpg" alt="">
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium dark:text-white">Rahul Verma</div>
+                                                    <div class="text-sm text-gray-500 dark:text-gray-400">rahul.verma@example.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">Sales</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">05 Jun 2023</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">+91 76543 21098</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">On Leave</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10">
+                                                    <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/47.jpg" alt="">
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium dark:text-white">Om Singh</div>
+                                                    <div class="text-sm text-gray-500 dark:text-gray-400">om.singh@example.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">IT</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">01 Jun 2023</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">+91 65432 10987</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10">
+                                                    <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/23.jpg" alt="">
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium dark:text-white">Anurag Singh</div>
+                                                    <div class="text-sm text-gray-500 dark:text-gray-400">anurag.singh@example.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">Support</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">02 Jun 2023</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">+91 54321 09876</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Active</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-dark-700 rounded-lg shadow overflow-hidden">
+                        <div class="p-6 border-b dark:border-dark-600">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-semibold dark:text-white">Pending Tasks</h3>
+                                <a href="#" class="text-sm text-blue-500 hover:underline">View All</a>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600 table">
+                                <thead class="bg-gray-50 dark:bg-gray-600">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Task</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Assignee</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Due Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Priority</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-dark-700 divide-y divide-gray-200 dark:divide-gray-600">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium dark:text-white">Onboarding new hires</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-8 w-8">
+                                                    <img class="h-8 w-8 rounded-full" src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
+                                                </div>
+                                                <div class="ml-2 text-sm dark:text-white">Sarah</div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">20 Jun 2023</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">High</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium dark:text-white">Performance reviews</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-8 w-8">
+                                                    <img class="h-8 w-8 rounded-full" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+                                                </div>
+                                                <div class="ml-2 text-sm dark:text-white">Amit</div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">25 Jun 2023</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Medium</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium dark:text-white">Update HR policies</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-8 w-8">
+                                                    <img class="h-8 w-8 rounded-full" src="https://randomuser.me/api/portraits/women/28.jpg" alt="">
+                                                </div>
+                                                <div class="ml-2 text-sm dark:text-white">Priya</div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm dark:text-white">30 Jun 2023</div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Low</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('content').classList.toggle('ml-20');
+        });
+
+        document.getElementById('mobileMenuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+            updateThemeIcon();
+        });
+
+        function updateThemeIcon() {
+            const themeToggle = document.getElementById('themeToggle');
+            if (document.documentElement.classList.contains('dark')) {
+                themeToggle.innerHTML = '<i class="fas fa-sun text-yellow-300"></i>';
+            } else {
+                themeToggle.innerHTML = '<i class="fas fa-moon text-gray-500"></i>';
+            }
+        }
+
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+        updateThemeIcon();
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden');
+            toast.classList.add('toast');
+            setTimeout(() => {
+                hideToast();
+            }, 3000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('hidden');
+            toast.classList.remove('toast');
+        }
+
+        setTimeout(() => {
+            showToast();
+        }, 1000);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+            const departmentChart = new Chart(departmentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance', 'Operations', 'IT', 'Design', 'Support'],
+                    datasets: [{
+                        data: [35, 20, 15, 10, 12, 8, 18, 14, 10],
+                        backgroundColor: [
+                            '#3B82F6',
+                            '#10B981',
+                            '#F59E0B',
+                            '#8B5CF6',
+                            '#EC4899',
+                            '#6366F1',
+                            '#22D3EE',
+                            '#F472B6',
+                            '#A3E635'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: document.documentElement.classList.contains('dark') ? '#fff' : '#000'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+            const attendanceChart = new Chart(attendanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'],
+                    datasets: [
+                        {
+                            label: 'Present',
+                            data: [90, 92, 94, 93, 95, 40, 20, 88, 90, 92, 91, 93, 45, 25],
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Absent',
+                            data: [10, 8, 6, 7, 5, 60, 80, 12, 10, 8, 9, 7, 55, 75],
+                            borderColor: '#F59E0B',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: document.documentElement.classList.contains('dark') ? '#fff' : '#000'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: document.documentElement.classList.contains('dark') ? '#fff' : '#000'
+                            },
+                            grid: {
+                                color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: document.documentElement.classList.contains('dark') ? '#fff' : '#000'
+                            },
+                            grid: {
+                                color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class') {
+                        const isDark = document.documentElement.classList.contains('dark');
+                        departmentChart.options.plugins.legend.labels.color = isDark ? '#fff' : '#000';
+                        attendanceChart.options.plugins.legend.labels.color = isDark ? '#fff' : '#000';
+                        attendanceChart.options.scales.y.ticks.color = isDark ? '#fff' : '#000';
+                        attendanceChart.options.scales.y.grid.color = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                        attendanceChart.options.scales.x.ticks.color = isDark ? '#fff' : '#000';
+                        attendanceChart.options.scales.x.grid.color = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                        departmentChart.update();
+                        attendanceChart.update();
+                    }
+                });
+            });
+
+            observer.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        });
+    </script>
+</body>
+</html>
